@@ -1,103 +1,157 @@
-begin tran
-create table Test_Employee (
-	EmployeeID int NOT NULL,
-	EmployeeName varchar(50),
-	JobPosition varchar(50),
-	TenureInYears int,
-	Company varchar(50)
-)
-commit
-select * from Test_Employee
+BEGIN TRAN
 
-begin tran
-insert into Test_Employee (
-	EmployeeID,
-	EmployeeName,
-	JobPosition,
-	TenureInYears,
-	Company
-)
-Values (
-	6,
-	'John',
-	'Product Tester',
-	3,
-	'Apple'
-)
-commit
+CREATE TABLE Test_Employee (
+	EmployeeID INT NOT NULL
+	,EmployeeName VARCHAR(50)
+	,JobPosition VARCHAR(50)
+	,TenureInYears INT
+	,Company VARCHAR(50)
+	)
 
-begin tran
-update Test_Employee
-set EmployeeID = 2
-where EmployeeName = 'Shamoon'
+COMMIT
 
-begin tran
-create table Finance_Table (
-	EmployeeID int NOT NULL,
-	EmployeeName varchar(50),
-	Salary varchar(50),
-	ProvidentFund int,
-)
-select * from Finance_Table
-commit
-begin tran
-insert into Finance_Table (
-	EmployeeID,
-	EmployeeName,
-	Salary,
-	ProvidentFund
-)
-Values (
-	6,
-	'Jerald',
-	85000,
-	2000
-)
-commit
-select * from Test_Employee
-select * from Finance_Table
+SELECT *
+FROM Test_Employee
 
-select avg(Salary) from Finance_Table
+BEGIN TRAN
 
-select * from Test_Employee where JobPosition like '%Manager'
+INSERT INTO Test_Employee (
+	EmployeeID
+	,EmployeeName
+	,JobPosition
+	,TenureInYears
+	,Company
+	)
+VALUES (
+	6
+	,'John'
+	,'Product Tester'
+	,3
+	,'Apple'
+	)
 
-begin tran
-alter table Finance_Table
-alter column Salary int
-commit
+COMMIT
 
-select avg(salary) from 
-(select emp.employeeid,emp.employeeName, jobposition, tenureinyears, company, fin.salary, fin.providentfund from Test_Employee emp
-inner join Finance_Table fin on emp.EmployeeID = fin.EmployeeID) IJT
-where company = 'Cisco'
+BEGIN TRAN
 
-select * from Finance_Table order by salary desc offset 1 row fetch first 1 row only
+UPDATE Test_Employee
+SET EmployeeID = 2
+WHERE EmployeeName = 'Shamoon'
 
-create procedure company_procedure @company varchar (50)
-as
-select * from
-(select emp.employeeId, emp.employeeName, emp.jobposition, emp.tenureinyears, emp.company, fin.salary, fin.providentfund
-from Test_Employee emp
-inner join Finance_Table fin on emp.EmployeeID=fin.EmployeeID) IJT
-where IJT.Company = @company
+BEGIN TRAN
 
-exec company_procedure @company='Apple'
+CREATE TABLE Finance_Table (
+	EmployeeID INT NOT NULL
+	,EmployeeName VARCHAR(50)
+	,Salary VARCHAR(50)
+	,ProvidentFund INT
+	,
+	)
 
-create trigger insertTrigger
-on Test_Employee
-for insert
-as
-	INSERT INTO EmpLog (EmpID,Operation,UpdatedDate)
-	SELECT EmployeeID ,'inserted',GETDATE() 
-	FROM inserted
+SELECT *
+FROM Finance_Table
 
+COMMIT
 
-	begin tran
-create table Test_Emplog (
-	EmployeeID int identity (1,1),
-	Operation varchar(50),
-	Time_Stamp varchar(50),
-)
-commit
-select * from Test_Emplog
+BEGIN TRAN
 
+INSERT INTO Finance_Table (
+	EmployeeID
+	,EmployeeName
+	,Salary
+	,ProvidentFund
+	)
+VALUES (
+	6
+	,'Jerald'
+	,85000
+	,2000
+	)
+
+COMMIT
+
+SELECT *
+FROM Test_Employee
+
+SELECT *
+FROM Finance_Table
+
+SELECT avg(Salary)
+FROM Finance_Table
+
+SELECT *
+FROM Test_Employee
+WHERE JobPosition LIKE '%Manager'
+
+BEGIN TRAN
+
+ALTER TABLE Finance_Table
+
+ALTER COLUMN Salary INT
+
+COMMIT
+
+SELECT avg(salary)
+FROM (
+	SELECT emp.employeeid
+		,emp.employeeName
+		,jobposition
+		,tenureinyears
+		,company
+		,fin.salary
+		,fin.providentfund
+	FROM Test_Employee emp
+	INNER JOIN Finance_Table fin ON emp.EmployeeID = fin.EmployeeID
+	) IJT
+WHERE company = 'Cisco'
+
+SELECT *
+FROM Finance_Table
+ORDER BY salary DESC offset 1 row
+
+FETCH first 1 row ONLY
+
+CREATE PROCEDURE company_procedure @company VARCHAR(50)
+AS
+SELECT *
+FROM (
+	SELECT emp.employeeId
+		,emp.employeeName
+		,emp.jobposition
+		,emp.tenureinyears
+		,emp.company
+		,fin.salary
+		,fin.providentfund
+	FROM Test_Employee emp
+	INNER JOIN Finance_Table fin ON emp.EmployeeID = fin.EmployeeID
+	) IJT
+WHERE IJT.Company = @company
+
+EXEC company_procedure @company = 'Apple'
+
+CREATE TRIGGER insertTrigger ON Test_Employee
+FOR INSERT
+AS
+INSERT INTO EmpLog (
+	EmpID
+	,Operation
+	,UpdatedDate
+	)
+SELECT EmployeeID
+	,'inserted'
+	,GETDATE()
+FROM inserted
+
+BEGIN TRAN
+
+CREATE TABLE Test_Emplog (
+	EmployeeID INT identity(1, 1)
+	,Operation VARCHAR(50)
+	,Time_Stamp VARCHAR(50)
+	,
+	)
+
+COMMIT
+
+SELECT *
+FROM Test_Emplog
